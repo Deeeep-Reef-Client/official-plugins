@@ -155,6 +155,7 @@ plugindev_newScriptButton.addEventListener("click", () => {
     mainElem.appendChild(typeElem);
     typeElem.innerHTML = `
         <option value="startup">startup</option>
+        <option value="appstart">appstart</option>
         <option value="preload">preload</option>
         <option value="domloaded">domloaded</option>
         <option value="game">game</option>
