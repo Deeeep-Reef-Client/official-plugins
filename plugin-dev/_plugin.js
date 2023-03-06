@@ -196,6 +196,11 @@ function plugindev_formatSrc() {
 ;
 // Plugin editor button onclick
 plugindev_newPluginButton.addEventListener("click", () => {
+    plugindev_OptionsName.value = "";
+    plugindev_OptionsId.value = "";
+    plugindev_OptionsDescription.value = "";
+    plugindev_OptionsAuthor.value = "";
+    plugindev_OptionsSrc.innerHTML = "";
     plugindev_pluginEditorModalContainer.classList.toggle("drc-modal-hidden");
 });
 plugindev_pluginEditorCloseButton.addEventListener("click", () => {
@@ -231,6 +236,7 @@ plugindev_openPluginButton.addEventListener("click", () => {
         plugindev_OptionsId.value = settings.pluginsData[i].id;
         plugindev_OptionsDescription.value = settings.pluginsData[i].description;
         plugindev_OptionsAuthor.value = settings.pluginsData[i].author;
+        plugindev_OptionsSrc.innerHTML = "";
         for (let j in settings.pluginsData[i].src) {
             // new script
             const mainElem = document.createElement("div");
