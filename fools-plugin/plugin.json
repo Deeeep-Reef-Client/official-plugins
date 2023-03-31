@@ -1,0 +1,12 @@
+{
+    "name": "Fool's Plugin",
+    "id": "fools-plugin",
+    "description": "April Fools 2023",
+    "author": "Dev",
+    "src": [
+        {
+            "type": "domloaded",
+            "src": "const logoWrapper = document.querySelector(\"div.el-image\");\nlogoWrapper.innerHTML = \"\";\nconst text = document.createElement(\"h1\");\ntext.setAttribute(\"style\", \"font-size:3em;height:1em;white-space:nowrap;line-height:1;font-family:Arial,Helvetica,sans-serif;\");\ntext.innerText = \"mope.io\";\nlogoWrapper.appendChild(text);\ndocument.querySelector(\"div.home-bg\").style.setProperty(\"background-image\", \"url(https://deeeep-reef-client.github.io/plugins-api/plugins/fools-plugin/mopeio.jpg)\", \"important\");\nwindow.addEventListener(\"load\", () => {\n    const style = document.createElement(\"style\");\n    style.innerHTML = `\n    div.loading-bar > img.ball {\n        display: block !important;\n        box-sizing: border-box !important;\n        background: url(https://deeeep-reef-client.github.io/plugins-api/plugins/fools-plugin/mopeio-mouse.png) no-repeat !important;\n        width: 127px !important;\n        height: 91px !important;\n        padding-left: 127px !important;\n    }\n    div.loading-bar > div {\n        background-color: #0fa929 !important;\n    }\n    .loading-container {\n        background-image: url(https://deeeep-reef-client.github.io/plugins-api/plugins/fools-plugin/mopeio-loadingbg.jpg) !important;\n    }\n    div.stats > div.el-row.animal-data > div.el-col.el-col-24.auto-col.relative > div.meter.vertical.rounded-none.animal > div:nth-child(1) {\n        background-color: #c0903e !important;\n    }\n    #app > div.overlay.gm-1 > div.choices > div.el-row.info {\n        background-color: #0faa29 !Important;\n    }\n    div.leaderboard.ranking > div.entry {\n        background-color: rgba(198,226,161,0.6) !important;\n    }\n    `;\n    document.head.appendChild(style);\n});"
+        }
+    ]
+}
