@@ -64,16 +64,20 @@ const plugindev_importPluginButton = document.getElementById("plugindev_importPl
 const plugindev_selectPlugin = document.getElementById("plugindev_selectPlugin");
 const plugindev_selectImportFile = document.getElementById("plugindev_selectImportFile");
 // Dev button onclick
-plugindev_pluginManagerOpenButton.addEventListener("click", () => {
-    plugindev_pluginManagerModalContainer.classList.toggle("drc-modal-hidden");
+function plugindev_reloadImportExport() {
     // reload open/export
     plugindev_selectPlugin.innerHTML = "";
     for (let i in settings.pluginsData) {
         const elem = document.createElement("option");
-        elem.setAttribute("value", JSON.stringify(settings.pluginsData[i].id));
+        elem.setAttribute("value", settings.pluginsData[i].id);
         elem.innerText = settings.pluginsData[i].name;
         plugindev_selectPlugin.appendChild(elem);
     }
+}
+
+plugindev_pluginManagerOpenButton.addEventListener("click", () => {
+    plugindev_pluginManagerModalContainer.classList.toggle("drc-modal-hidden");
+    plugindev_reloadImportExport();
 });
 plugindev_pluginManagerCloseButton.addEventListener("click", () => {
     plugindev_pluginManagerModalContainer.classList.toggle("drc-modal-hidden");
@@ -159,6 +163,7 @@ plugindev_newScriptButton.addEventListener("click", () => {
         <option value="preload">preload</option>
         <option value="domloaded">domloaded</option>
         <option value="game">game</option>
+        <option value="install">install</option>
         `;
     const spacer1 = document.createElement("div");
     spacer1.classList.add("spacer");
@@ -227,11 +232,12 @@ plugindev_pluginEditorSaveButton.addEventListener("click", () => {
     plugindev_pluginEditorModalContainer.classList.toggle("drc-modal-hidden");
     saveSettings();
     updateInstalledPluginsList();
+    plugindev_reloadImportExport();
 });
 // open existing
 plugindev_openPluginButton.addEventListener("click", () => {
     for (let i in settings.pluginsData) {
-        if (("\"" + settings.pluginsData[i].id + "\"") != plugindev_selectPlugin.value)
+        if (settings.pluginsData[i].id != plugindev_selectPlugin.value)
             continue;
         plugindev_OptionsName.value = settings.pluginsData[i].name;
         plugindev_OptionsId.value = settings.pluginsData[i].id;
@@ -247,9 +253,11 @@ plugindev_openPluginButton.addEventListener("click", () => {
             mainElem.appendChild(typeElem);
             typeElem.innerHTML = `
                 <option value="startup">startup</option>
+                <option value="appstart">appstart</option>
                 <option value="preload">preload</option>
                 <option value="domloaded">domloaded</option>
                 <option value="game">game</option>
+                <option value="install">install</option>
                 `;
             typeElem.value = settings.pluginsData[i].src[j].type;
             const spacer1 = document.createElement("div");
@@ -279,31 +287,31 @@ plugindev_openPluginButton.addEventListener("click", () => {
 });
 // export
 plugindev_exportPluginButton.addEventListener("click", () => {
-    let exportedPlugin = "";
+    let exportedPlugin = {};
     for (let i in settings.pluginsData) {
-        if (("\"" + settings.pluginsData[i].id + "\"") != plugindev_selectPlugin.value)
+        if (settings.pluginsData[i].id != plugindev_selectPlugin.value)
             continue;
         exportedPlugin = settings.pluginsData[i];
         break;
     }
     ;
     const content = JSON.stringify(exportedPlugin);
-    ipcRenderer.send("getPath", "downloads");
-    ipcRenderer.on("gettedPath", (_event, path) => {
-        try {
-            fs.writeFileSync(path + `/${exportedPlugin.name.replace(/[^a-zA-Z0-9]/g, '')}.drcplugin.json`, content);
-            new Notification("Plugin exported!", {
-                body: `Your plugin has been exported to ${exportedPlugin.name.replace(/[^a-zA-Z0-9]/g, '')}.drcplugin.json in your Downloads folder. `
-            });
-            // file written successfully
-        }
-        catch (err) {
-            console.error(err);
-            new Notification("Something went wrong", {
-                body: `An error occurred while exporting your plugin.`
-            });
-        }
-    });
+    ipcRenderer.invoke("getPath", "downloads")
+        .then(path => {
+            try {
+                fs.writeFileSync(path + `/${exportedPlugin.name.replace(/[^a-zA-Z0-9]/g, '')}.drcplugin.json`, content);
+                new Notification("Plugin exported!", {
+                    body: `Your plugin has been exported to ${exportedPlugin.name.replace(/[^a-zA-Z0-9]/g, '')}.drcplugin.json in your Downloads folder. `
+                });
+                // file written successfully
+            }
+            catch (err) {
+                console.error(err);
+                new Notification("Something went wrong", {
+                    body: `An error occurred while exporting your plugin.`
+                });
+            }
+        });
 });
 // import
 plugindev_importPluginButton.addEventListener("click", () => {
@@ -327,6 +335,7 @@ plugindev_importPluginButton.addEventListener("click", () => {
         settings.pluginsData.push(parsedPlugin);
         updateInstalledPluginsList();
         saveSettings();
+        plugindev_reloadImportExport();
     });
     reader.readAsDataURL(theme);
 });
