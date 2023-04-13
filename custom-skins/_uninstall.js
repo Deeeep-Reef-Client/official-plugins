@@ -1,0 +1,1 @@
+settings.assetSwapperConfig = settings.assetSwapperConfig.filter(a => !a.skin.startsWith("drcskin_"));
