@@ -5,5 +5,6 @@ Plugins can be found in the correspondingly named directory.
 
 # List
 
-- Plugin Dev (plugin-dev)
+- Plugin Dev (plugin-dev)  
+- Custom Skins (custom-skins)
 - Fool's Plugin (fools-plugin)
