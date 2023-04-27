@@ -68,12 +68,12 @@ http.createServer(function (req, res) {
         res.end();
     } else if (req.url.startsWith("/cdn/skins/")) {
         const skin = settings.pluginUserData["custom-skins"].skins
-            .filter(skin => skin.id === req.url.slice(11, 22))[0];
+            .filter(skin => skin.id === req.url.slice(11, 21))[0];
         if (skin === undefined || skin.assets[req.url.slice(11)] === undefined) {
             res.end();
             return;
         }
-        const img = Buffer.from(skin.assets[req.url.slice(11)].slice(22), "base64");
+        const img = Buffer.from(skin.assets[req.url.slice(11)].slice(21), "base64");
         res.writeHead(200, {
             "Content-Type": "image/png",
             "Content-Length": img.length
