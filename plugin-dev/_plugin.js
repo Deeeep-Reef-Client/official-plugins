@@ -341,3 +341,6 @@ plugindev_importPluginButton.addEventListener("click", () => {
     });
     reader.readAsDataURL(theme);
 });
+
+// Advanced Theme
+themeMakerAdvancedThemeContainer.classList.remove("drc-modal-hidden");
