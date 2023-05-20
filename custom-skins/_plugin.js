@@ -180,7 +180,7 @@ const customskins_customSkinManagerDiv = DRC.Modal.buildModal("customskins_", "C
                     <div class="spacer"></div>
 <div id="customskins_skinList">
 </div>
-`);
+`, true);
 
 customskins_customSkinManagerOpenButton.addEventListener("click", () => {
     customskins_updateCustomSkinsList();
@@ -200,7 +200,7 @@ const customskins_importSkinFile = document.getElementById("customskins_importSk
 const customskins_skinEditorDiv = DRC.Modal.buildModal("customskins_skinEditor", "Skin Editor", `
 <div id="customskins_skinTabsContainer"></div>
 <button id="customskins_saveButton" class="assetswapper-new-button assetswapper-add-button">Save</button>
-`);
+`, true);
 
 const customskins_skinEditorTabs = DRC.Modal.buildTab("customskins_skinEditor", [
     {
