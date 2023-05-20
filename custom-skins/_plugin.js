@@ -84,8 +84,6 @@ http.createServer(function (req, res) {
     }
 }).listen(4319);
 
-// MIT http://rem.mit-license.org
-// THE FOLLOWING IS LICENSED UNDER THE MIT LICENSE
 // Copyright © 2023 Remy Sharp, https://remysharp.com <remy@remysharp.com>
 function customskins_trimCanvas(c) {
     var ctx = c.getContext('2d'),
@@ -141,7 +139,7 @@ function customskins_trimCanvas(c) {
     // open new window with trimmed image:
     return copy.canvas;
 }
-// END
+// END COPYRIGHT
 
 let customskins_skinAssets = [
     {
