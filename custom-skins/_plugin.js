@@ -235,7 +235,7 @@ const customskins_skinEditorTabs = DRC.Modal.buildTab("customskins_skinEditor", 
             <button id="customskins_deleteAssetButton" class="assetswapper-new-button assetswapper-add-button">Delete</button>
         </div>
         <div style="display:flex;">
-            <canvas id="customskins_assetDisplayCanvas" style="width: 150px;height:200px;margin:15px;"></canvas>
+            <canvas id="customskins_assetDisplayCanvas" width="150px" height="200px" style="margin:15px;"></canvas>
             <div class="spacer"></div>
             <div style="margin:15px">
                 <div class="assetswapper-list-rule">
