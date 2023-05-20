@@ -68,12 +68,12 @@ http.createServer(function (req, res) {
         res.end();
     } else if (req.url.startsWith("/cdn/skins/")) {
         const skin = settings.pluginUserData["custom-skins"].skins
-            .filter(skin => skin.id === req.url.slice(11, 21))[0];
+            .filter(skin => skin.id === req.url.slice(11, 17))[0];
         if (skin === undefined || skin.assets[req.url.slice(11)] === undefined) {
             res.end();
             return;
         }
-        const img = Buffer.from(skin.assets[req.url.slice(11)].slice(21), "base64");
+        const img = Buffer.from(skin.assets[req.url.slice(11)].replace("data:image/png;base64,", ""), "base64");
         res.writeHead(200, {
             "Content-Type": "image/png",
             "Content-Length": img.length
@@ -379,7 +379,7 @@ function customskins_updateCustomSkinsList() {
             customskins_updateAssetList();
             customskins_loadAsset();
 
-            customskins_customSkinManagerDiv.classList.removeAttribute("drc-modal-hidden");
+            customskins_customSkinManagerDiv.classList.remove("drc-modal-hidden");
         });
         mainElem.appendChild(editElem);
 
@@ -468,7 +468,7 @@ function customskins_renderAsset() {
             // customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
             //     centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
             customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
-                centerShift_x, centerShift_y, animalImg.width, animalImg.height); // destination
+                centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
         });
         animalImg.src = "https://beta.deeeep.io/assets/characters/"
             + animalList.find(a => a.id == customskins_OptionsAnimal.value || 0).stringId
@@ -492,6 +492,10 @@ function customskins_renderAsset() {
         console.log(ratio)
     });
 }
+
+customskins_OptionsAnimal.addEventListener("change", () => {
+    customskins_renderAsset();
+});
 
 customskins_newAssetButton.addEventListener("click", () => {
     let name = 1;
@@ -684,7 +688,7 @@ function customskins_purgeAssetswapper() {
 
 function customskins_clearMaker() {
     customskins_OptionsName.value = "";
-    customskins_OptionsAnimal.value = "";
+    customskins_OptionsAnimal.value = "0";
     customskins_assetDisplayCanvasCtx.fillRect(0, 0, 1000, 1000);
     customskins_OptionsSelectAsset.innerHTML = "";
     customskins_OptionsAssetName.value = "";
@@ -716,7 +720,7 @@ customskins_newButton.addEventListener("click", () => {
 });
 
 customskins_saveButton.addEventListener("click", () => {
-    const id = (Math.random() + 1).toString(36).substring(2);
+    const id = (Math.random() + 1).toString(36).substring(2, 8);
 
     let assets = {};
     let assetsData = {};
