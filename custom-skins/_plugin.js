@@ -38,52 +38,6 @@ Asset Data
 */
 //(Math.random() + 1).toString(36).substring(2);
 
-const http = require('http');
-
-console.log(settings);
-
-// init setting if undefined
-if (settings.pluginUserData["custom-skins"] === undefined || settings.pluginUserData["custom-skins"].skins === undefined) {
-    settings.pluginUserData["custom-skins"] = { skins: [] };
-}
-
-http.createServer(function (req, res) {
-    console.log(req.url);
-    res.setHeader("Access-Control-Allow-Origin", req.headers["origin"] ?? "https://beta.deeeep.io");
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, authorization, CSRF-Token, Twitch, X-Timezone");
-    res.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-
-    if (req.url.startsWith("/api/skins/")) {
-        const skin = settings.pluginUserData["custom-skins"].skins
-            .filter(skin => skin.id === req.url.slice(11))[0];
-        if (skin === undefined) {
-            res.end();
-            return;
-        }
-        res.writeHead(200, { "Content-Type": "application/json" });
-        let resSkin = structuredClone(skin);
-        delete resSkin.assets;
-        res.write(JSON.stringify(resSkin));
-        res.end();
-    } else if (req.url.startsWith("/cdn/skins/")) {
-        const skin = settings.pluginUserData["custom-skins"].skins
-            .filter(skin => skin.id === req.url.slice(11, 17))[0];
-        if (skin === undefined || skin.assets[req.url.slice(11)] === undefined) {
-            res.end();
-            return;
-        }
-        const img = Buffer.from(skin.assets[req.url.slice(11)].replace("data:image/png;base64,", ""), "base64");
-        res.writeHead(200, {
-            "Content-Type": "image/png",
-            "Content-Length": img.length
-        });
-        res.end(img);
-    } else {
-        res.end();
-    }
-}).listen(4319);
-
 // Copyright © 2023 Remy Sharp, https://remysharp.com <remy@remysharp.com>
 function customskins_trimCanvas(c) {
     var ctx = c.getContext('2d'),
