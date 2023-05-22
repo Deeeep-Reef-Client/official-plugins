@@ -165,6 +165,7 @@ plugindev_newScriptButton.addEventListener("click", () => {
         <option value="game">game</option>
         <option value="install">install</option>
         <option value="uninstall">uninstall</option>
+        <option value="update">update</option>
         `;
     const spacer1 = document.createElement("div");
     spacer1.classList.add("spacer");
@@ -260,6 +261,7 @@ plugindev_openPluginButton.addEventListener("click", () => {
                 <option value="game">game</option>
                 <option value="install">install</option>
                 <option value="uninstall">uninstall</option>
+                <option value="update">update</option>
                 `;
             typeElem.value = settings.pluginsData[i].src[j].type;
             const spacer1 = document.createElement("div");
