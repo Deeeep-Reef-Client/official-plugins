@@ -295,10 +295,10 @@ plugindev_exportPluginButton.addEventListener("click", () => {
     for (let i in settings.pluginsData) {
         if (settings.pluginsData[i].id != plugindev_selectPlugin.value)
             continue;
-        exportedPlugin = settings.pluginsData[i];
+        exportedPlugin = structuredClone(settings.pluginsData[i]);
         break;
-    }
-    ;
+    };
+    delete exportedPlugin.version;
     const content = JSON.stringify(exportedPlugin);
     ipcRenderer.invoke("getPath", "downloads")
         .then(path => {
