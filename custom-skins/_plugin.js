@@ -334,7 +334,7 @@ function customskins_updateCustomSkinsList() {
             customskins_updateAssetList();
             customskins_loadAsset();
 
-            customskins_customSkinManagerDiv.classList.remove("drc-modal-hidden");
+            customskins_skinEditorDiv.classList.remove("drc-modal-hidden");
         });
         mainElem.appendChild(editElem);
 
