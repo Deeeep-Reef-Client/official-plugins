@@ -135,6 +135,7 @@ const customskins_customSkinManagerDiv = DRC.Modal.buildModal("customskins_", "C
 `, true);
 
 customskins_customSkinManagerOpenButton.addEventListener("click", () => {
+    customskins_purgeSkinActiveList();
     customskins_updateCustomSkinsList();
     customskins_reloadImportExport();
     customskins_customSkinManagerDiv.classList.toggle("drc-modal-hidden");
@@ -640,6 +641,17 @@ function customskins_purgeAssetswapper() {
     updateAssetSwapperList();
 }
 
+function customskins_purgeSkinActiveList() {
+    for (let i in settings.pluginUserData["custom-skins"].skins) {
+        if (settings.assetSwapperConfig.find(
+            s => s.skin === "drcskin_" + settings.pluginUserData["custom-skins"].skins[i].id)) {
+            settings.pluginUserData["custom-skins"].skins[i].active = true;
+        } else settings.pluginUserData["custom-skins"].skins[i].active = false;
+    }
+
+    saveSettings();
+}
+
 function customskins_clearMaker() {
     customskins_OptionsName.value = "";
     customskins_OptionsAnimal.value = "0";
@@ -789,3 +801,5 @@ customskins_importSkinButton.addEventListener("click", () => {
     });
     reader.readAsDataURL(theme);
 });
+
+customskins_purgeSkinActiveList();
