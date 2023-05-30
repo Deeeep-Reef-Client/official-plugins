@@ -99,6 +99,8 @@ let customskins_skinAssets = [
     {
         name: "<main>",
         asset: "",
+        originalAsset: "",
+        scale: 0,
         offset: {
             x: 0,
             y: 0
@@ -190,7 +192,7 @@ const customskins_skinEditorTabs = DRC.Modal.buildTab("customskins_skinEditor", 
             <button id="customskins_deleteAssetButton" class="assetswapper-new-button assetswapper-add-button">Delete</button>
         </div>
         <div style="display:flex;">
-            <canvas id="customskins_assetDisplayCanvas" width="150px" height="200px" style="margin:15px;"></canvas>
+            <canvas id="customskins_assetDisplayCanvas" width="144px" height="204px" style="margin:15px;"></canvas>
             <div class="spacer"></div>
             <div style="margin:15px">
                 <div class="assetswapper-list-rule">
@@ -203,6 +205,13 @@ const customskins_skinEditorTabs = DRC.Modal.buildTab("customskins_skinEditor", 
                     <p>Display Animal: </p>
                     <div class="spacer"></div>
                     <input type="checkbox" id="customskins_OptionsDisplayAnimal" checked>
+                </div>
+                <div class="spacer"></div>
+                <div class="assetswapper-list-rule">
+                    <p>Scale: </p>
+                    <div class="spacer"></div>
+                    <input type="range" id="customskins_OptionsScale" min="0" max="10" value="5">
+                    <span id="customskins_DisplayScale"></span>
                 </div>
                 <div class="spacer"></div>
                 <div class="assetswapper-list-rule">
@@ -305,11 +314,15 @@ function customskins_updateCustomSkinsList() {
             customskins_OptionsOffsetX.value = 0;
             customskins_OptionsOffsetY.value = 0;
             customskins_OptionsAssetFile.value = "";
+            customskins_OptionsScale.value = 5;
+            customskins_DisplayScale.innerText = "";
 
             customskins_skinAssets = [
                 {
                     name: "<main>",
                     asset: settings.pluginUserData["custom-skins"].skins[i].assets[settings.pluginUserData["custom-skins"].skins[i].id + ".png"],
+                    originalAsset: settings.pluginUserData["custom-skins"].skins[i].assets["original-" + settings.pluginUserData["custom-skins"].skins[i].id + ".png"],
+                    scale: settings.pluginUserData["custom-skins"].skins[i].skins[i].scale,
                     offset: {
                         x: Number(settings.pluginUserData["custom-skins"].skins[i].data.offset.x),
                         y: Number(settings.pluginUserData["custom-skins"].skins[i].data.offset.y)
@@ -321,7 +334,9 @@ function customskins_updateCustomSkinsList() {
             for (let k in assetKeys) {
                 customskins_skinAssets.push({
                     name: assetKeys[k],
-                    asset: settings.pluginUserData["custom-skins"].skins[i].assets["drcskin_" + settings.pluginUserData["custom-skins"].skins[i].id + "-" + assetKeys[k] + ".png"],
+                    asset: settings.pluginUserData["custom-skins"].skins[i].assets[settings.pluginUserData["custom-skins"].skins[i].id + "-" + assetKeys[k] + ".png"],
+                    originalAsset: settings.pluginUserData["custom-skins"].skins[i].assets["original-" + settings.pluginUserData["custom-skins"].skins[i].id + "-" + assetKeys[k] + ".png"],
+                    scale: settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].scale,
                     offset: {
                         x: settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].offset.x,
                         y: settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].offset.y
@@ -371,17 +386,54 @@ const customskins_OptionsOffsetX = document.getElementById("customskins_OptionsO
 const customskins_OptionsOffsetY = document.getElementById("customskins_OptionsOffsetY");
 const customskins_OptionsAssetFile = document.getElementById("customskins_OptionsAssetFile");
 
+const customskins_OptionsScale = document.getElementById("customskins_OptionsScale");
+const customskins_DisplayScale = document.getElementById("customskins_DisplayScale");
+
 const customskins_OptionsDisplayAnimal = document.getElementById("customskins_OptionsDisplayAnimal");
 
 
 function customskins_saveAsset() {
     customskins_skinAssets.forEach(asset => {
         if (asset.name !== customskins_selectedAsset) return;
-
+        if (
+            asset.name !== customskins_OptionsAssetName.value
+            && customskins_skinAssets.find(a => a.name === customskins_OptionsAssetName.value)) {
+            customskins_OptionsAssetName.value = asset.name;
+            return;
+        }
         asset.name = customskins_OptionsAssetName.value;
         asset.offset.x = customskins_OptionsOffsetX.value;
         asset.offset.y = customskins_OptionsOffsetY.value;
+        const newScale = Number(((-(5 - customskins_OptionsScale.value) / 100) + asset.scale).toFixed(2));
+        if (asset.scale !== newScale && Math.sign(newScale) !== -1) asset.scale = newScale;
+        customskins_DisplayScale.innerText = asset.scale;
+
+        const canvas = document.createElement("canvas");
+        const img = new Image();
+        img.addEventListener("load", () => {
+            img.width *= asset.scale;
+            img.height *= asset.scale;
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+
+            customskins_skinAssets.forEach(asset => {
+                if (asset.name !== customskins_selectedAsset) return;
+                asset.asset = customskins_trimCanvas(canvas).toDataURL("image/png");
+            });
+
+            customskins_renderAsset();
+
+            console.log("resize asset");
+            console.log(customskins_skinAssets);
+            console.log(customskins_selectedAsset);
+        });
+        img.src = asset.originalAsset;
     });
+
+    customskins_OptionsScale.value = 5;
 
     console.log("save asset");
     console.log(customskins_skinAssets);
@@ -407,45 +459,46 @@ function customskins_updateAssetList() {
 }
 
 function customskins_renderAsset() {
+    console.log("render asset");
+
     const asset = customskins_skinAssets.filter(a => a.name === customskins_selectedAsset)[0];
     if (asset === undefined) return;
 
     customskins_assetDisplayCanvasCtx.fillRect(0, 0, 1000, 1000);
 
+    function renderSkin() {
+        const img = new Image();
+        img.src = asset.asset;
+        img.addEventListener("load", () => {
+            const ratio = 0.8;
+            let centerShift_x = ((customskins_assetDisplayCanvas.width - img.width * ratio) / 2) + asset.offset.x;
+            let centerShift_y = ((customskins_assetDisplayCanvas.height - img.height * ratio) / 2) - asset.offset.y;
+            console.log(((customskins_assetDisplayCanvas.width - img.width * ratio) / 2))
+            console.log(((customskins_assetDisplayCanvas.width - img.width * ratio) / 2) + asset.offset.x)
+            customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,
+                centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+            // customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
+            //     0, 0, customskins_assetDisplayCanvas.width, customskins_assetDisplayCanvas.height); // destination 
+        });
+    }
+
     if (customskins_OptionsDisplayAnimal.checked) {
         const animalImg = new Image();
         animalImg.addEventListener("load", () => {
-            let hRatio = customskins_assetDisplayCanvas.width / animalImg.width;
-            let vRatio = customskins_assetDisplayCanvas.height / animalImg.height;
-            let ratio = Math.min(hRatio, vRatio);
+            let ratio = 0.8;
             let centerShift_x = (customskins_assetDisplayCanvas.width - animalImg.width * ratio) / 2;
             let centerShift_y = (customskins_assetDisplayCanvas.height - animalImg.height * ratio) / 2;
             // customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
             //     centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
             customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
                 centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
+
+            renderSkin();
         });
         animalImg.src = "https://beta.deeeep.io/assets/characters/"
             + animalList.find(a => a.id == customskins_OptionsAnimal.value || 0).stringId
             + ".png";
-    }
-
-    const img = new Image();
-    img.src = asset.asset;
-    img.addEventListener("load", () => {
-        let hRatio = customskins_assetDisplayCanvas.width / img.width;
-        let vRatio = customskins_assetDisplayCanvas.height / img.height;
-        let ratio = Math.min(hRatio, vRatio);
-        let centerShift_x = (customskins_assetDisplayCanvas.width - img.width * ratio) / 2;
-        let centerShift_y = (customskins_assetDisplayCanvas.height - img.height * ratio) / 2;
-        customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,
-            centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
-        // customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
-        //     0, 0, customskins_assetDisplayCanvas.width, customskins_assetDisplayCanvas.height); // destination 
-        console.log(hRatio)
-        console.log(vRatio)
-        console.log(ratio)
-    });
+    } else renderSkin();
 }
 
 customskins_OptionsAnimal.addEventListener("change", () => {
@@ -454,12 +507,15 @@ customskins_OptionsAnimal.addEventListener("change", () => {
 
 customskins_newAssetButton.addEventListener("click", () => {
     let name = 1;
-    while (customskins_skinAssets.filter(a => a.name === "New Asset_" + name).length > 0) {
+    while (customskins_skinAssets.find(a => a.name === "New_Asset_" + name)) {
         name++
+        console.log(name);
     }
     customskins_skinAssets.push({
         name: "New_Asset_" + name,
         asset: "",
+        originalAsset: "",
+        scale: 0,
         offset: {
             x: 0,
             y: 0
@@ -501,32 +557,46 @@ customskins_OptionsAssetFile.addEventListener("change", () => {
     const canvas = document.createElement("canvas");
     const img = new Image();
     img.addEventListener("load", () => {
-        const animal = animalStatData.find(a => a.fishLevel == (customskins_OptionsAnimal.value || 0));
+        const originalReader = new FileReader();
+        originalReader.readAsDataURL(customskins_OptionsAssetFile.files[0]);
+        originalReader.addEventListener("load", () => {
+            const animal = animalStatData.find(a => a.fishLevel == (customskins_OptionsAnimal.value || 0));
 
-        // Resize to fit
-        let hRatio = (animal.sizeScale.x * 180) / img.width;
-        let vRatio = (animal.sizeScale.y * 255) / img.height;
-        let ratio = Math.min(hRatio, vRatio);
+            // {
+            //     "name":"fish",
+            //     "size":{"x":48,"y":68},
+            //     "mass":1,"boosts":1,
+            //     "level":0,"fishLevel":0,
+            //     "oxygenTime":20,"oxygenTimeMs":20000,"temperatureTime":10,"temperatureTimeMs":10000,"pressureTime":5,"pressureTimeMs":5000,"salinityTime":20,"salinityTimeMs":20000,"speedMultiplier":1,"walkSpeedMultiplier":1,"jumpForceMultiplier":1,"sizeMultiplier":0.9,"sizeScale":{"x":1,"y":1},"damageMultiplier":1,"healthMultiplier":1.5,"damageBlock":0,"damageReflection":0,"bleedReduction":0,"armorPenetration":0,"poisonResistance":0,"permanentEffects":0,"
+            // Resize to fit
+            console.log(animal)
+            let hRatio = 180 / img.width;
+            let vRatio = 255 / img.height;
+            let ratio = Number(Math.min(hRatio, vRatio).toFixed(2));
 
-        img.width *= ratio;
-        img.height *= ratio;
+            img.width *= ratio;
+            img.height *= ratio;
 
-        canvas.width = img.width;
-        canvas.height = img.height;
-        canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+            canvas.width = img.width;
+            canvas.height = img.height;
+            canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
 
-        customskins_skinAssets.forEach(asset => {
-            if (asset.name !== customskins_selectedAsset) return;
-            asset.asset = customskins_trimCanvas(canvas).toDataURL("image/png");
+            customskins_skinAssets.forEach(asset => {
+                if (asset.name !== customskins_selectedAsset) return;
+                asset.asset = customskins_trimCanvas(canvas).toDataURL("image/png");
+                asset.originalAsset = originalReader.result
+                asset.scale = ratio;
+            });
+
+
+            console.log("file asset");
+            console.log(customskins_skinAssets);
+            console.log(customskins_selectedAsset);
+
+            customskins_saveAsset();
+            customskins_updateAssetList();
+            customskins_renderAsset();
         });
-
-        console.log("file asset");
-        console.log(customskins_skinAssets);
-        console.log(customskins_selectedAsset);
-
-        customskins_saveAsset();
-        customskins_updateAssetList();
-        customskins_renderAsset();
     });
     img.src = URL.createObjectURL(customskins_OptionsAssetFile.files[0]);
 });
@@ -543,8 +613,13 @@ function customskins_loadAsset() {
     customskins_OptionsOffsetY.value = asset.offset.y;
     customskins_OptionsAssetFile.value = "";
 
+    customskins_OptionsScale.value = asset.scale;
+    customskins_DisplayScale.innerText = asset.scale;
+
     customskins_assetDisplayCanvasCtx.fillRect(0, 0, 1000, 1000);
     customskins_OptionsSelectAsset.value = customskins_selectedAsset;
+
+    customskins_renderAsset();
 
     console.log("load asset end");
     console.log(customskins_skinAssets);
@@ -595,6 +670,10 @@ customskins_OptionsOffsetX.addEventListener("change", () => {
 
 customskins_OptionsOffsetY.addEventListener("change", () => {
     console.log('chang')
+    customskins_saveAsset();
+});
+
+customskins_OptionsScale.addEventListener("change", () => {
     customskins_saveAsset();
 });
 
@@ -661,6 +740,8 @@ function customskins_clearMaker() {
     customskins_OptionsOffsetX.value = 0;
     customskins_OptionsOffsetY.value = 0;
     customskins_OptionsAssetFile.value = "";
+    customskins_OptionsScale.value = 5;
+    customskins_DisplayScale.innerText = "";
 
     customskins_selectedAsset = "<main>";
 
@@ -668,6 +749,8 @@ function customskins_clearMaker() {
         {
             name: "<main>",
             asset: "",
+            originalAsset: "",
+            scale: 0,
             offset: {
                 x: 0,
                 y: 0
@@ -690,22 +773,29 @@ customskins_saveButton.addEventListener("click", () => {
 
     let assets = {};
     let assetsData = {};
+    let mainScale = 0;
 
     for (let i in customskins_skinAssets) {
         if (customskins_skinAssets[i].name !== "<main>") {
             assetsData[customskins_skinAssets[i].name] = {
                 asset: "drcskin_" + id + "-" + customskins_skinAssets[i].name + ".png",
+                scale: customskins_skinAssets[i].scale,
                 offset: {
                     x: customskins_skinAssets[i].offset.x,
                     y: customskins_skinAssets[i].offset.y
                 }
             };
-        }
+        } else mainScale = customskins_skinAssets[i].scale;
 
         assets[customskins_skinAssets[i].name === "<main>" ?
             id + ".png" :
             id + "-" + customskins_skinAssets[i].name + ".png"
         ] = customskins_skinAssets[i].asset;
+
+        assets[customskins_skinAssets[i].name === "<main>" ?
+            "original-" + id + ".png" :
+            "original-" + id + "-" + customskins_skinAssets[i].name + ".png"
+        ] = customskins_skinAssets[i].originalAsset;
     }
 
     settings.pluginUserData["custom-skins"].skins.push({
@@ -721,7 +811,8 @@ customskins_saveButton.addEventListener("click", () => {
             }
         },
         assets_data: assetsData,
-        assets
+        assets,
+        scale: mainScale
     });
 
     customskins_skinEditorDiv.classList.add("drc-modal-hidden");
