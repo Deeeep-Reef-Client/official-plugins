@@ -338,8 +338,8 @@ function customskins_updateCustomSkinsList() {
                     originalAsset: settings.pluginUserData["custom-skins"].skins[i].assets["original-" + settings.pluginUserData["custom-skins"].skins[i].id + "-" + assetKeys[k] + ".png"],
                     scale: settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].scale,
                     offset: {
-                        x: settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].offset.x,
-                        y: settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].offset.y
+                        x: Number(settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].offset.x),
+                        y: Number(settings.pluginUserData["custom-skins"].skins[i].assets_data[assetKeys[k]].offset.y)
                     }
                 });
             }
@@ -402,8 +402,8 @@ function customskins_saveAsset() {
             return;
         }
         asset.name = customskins_OptionsAssetName.value;
-        asset.offset.x = customskins_OptionsOffsetX.value;
-        asset.offset.y = customskins_OptionsOffsetY.value;
+        asset.offset.x = Number(customskins_OptionsOffsetX.value);
+        asset.offset.y = Number(customskins_OptionsOffsetY.value);
         const newScale = Number(((-(5 - customskins_OptionsScale.value) / 100) + asset.scale).toFixed(2));
         if (asset.scale !== newScale && Math.sign(newScale) !== -1) asset.scale = newScale;
         customskins_DisplayScale.innerText = asset.scale;
@@ -472,9 +472,7 @@ function customskins_renderAsset() {
         img.addEventListener("load", () => {
             const ratio = 0.8;
             let centerShift_x = ((customskins_assetDisplayCanvas.width - img.width * ratio) / 2) + asset.offset.x;
-            let centerShift_y = ((customskins_assetDisplayCanvas.height - img.height * ratio) / 2) - asset.offset.y;
-            console.log(((customskins_assetDisplayCanvas.width - img.width * ratio) / 2))
-            console.log(((customskins_assetDisplayCanvas.width - img.width * ratio) / 2) + asset.offset.x)
+            let centerShift_y = ((customskins_assetDisplayCanvas.height - img.height * ratio) / 2) + asset.offset.y;
             customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,
                 centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
             // customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
