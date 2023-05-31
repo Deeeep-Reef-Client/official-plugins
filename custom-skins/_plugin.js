@@ -108,6 +108,7 @@ let customskins_skinAssets = [
     }
 ];
 let customskins_selectedAsset = "<main>";
+let customskins_animalImages = {};
 
 const customskins_customSkinManagerOpenButton = document.createElement("button");
 customskins_customSkinManagerOpenButton.classList.add("assetswapper-new-button");
@@ -211,19 +212,13 @@ const customskins_skinEditorTabs = DRC.Modal.buildTab("customskins_skinEditor", 
                     <p>Scale: </p>
                     <div class="spacer"></div>
                     <input type="range" id="customskins_OptionsScale" min="0" max="10" value="5">
-                    <span id="customskins_DisplayScale"></span>
+                    <span id="customskins_DisplayScale">unknown</span><p>x</p>
                 </div>
                 <div class="spacer"></div>
                 <div class="assetswapper-list-rule">
-                    <p>Offset X: </p>
+                    <p>Offset: </p>
                     <div class="spacer"></div>
-                    <input type="number" id="customskins_OptionsOffsetX" placeholder="0">
-                </div>
-                <div class="spacer"></div>
-                <div class="assetswapper-list-rule">
-                    <p>Offset Y: </p>
-                    <div class="spacer"></div>
-                    <input type="number" id="customskins_OptionsOffsetY" placeholder="0">
+                    <p>X: <span id="customskins_DisplayOffsetX">unknown</span>, Y: <span id="customskins_DisplayOffsetY">unknown</span></p>
                 </div>
                 <div class="spacer"></div>
                 <div class="assetswapper-list-rule">
@@ -311,8 +306,6 @@ function customskins_updateCustomSkinsList() {
 
             customskins_OptionsSelectAsset.innerHTML;
             customskins_OptionsAssetName.value = "";
-            customskins_OptionsOffsetX.value = 0;
-            customskins_OptionsOffsetY.value = 0;
             customskins_OptionsAssetFile.value = "";
             customskins_OptionsScale.value = 5;
             customskins_DisplayScale.innerText = "";
@@ -322,7 +315,7 @@ function customskins_updateCustomSkinsList() {
                     name: "<main>",
                     asset: settings.pluginUserData["custom-skins"].skins[i].assets[settings.pluginUserData["custom-skins"].skins[i].id + ".png"],
                     originalAsset: settings.pluginUserData["custom-skins"].skins[i].assets["original-" + settings.pluginUserData["custom-skins"].skins[i].id + ".png"],
-                    scale: settings.pluginUserData["custom-skins"].skins[i].skins[i].scale,
+                    scale: settings.pluginUserData["custom-skins"].skins[i].scale,
                     offset: {
                         x: Number(settings.pluginUserData["custom-skins"].skins[i].data.offset.x),
                         y: Number(settings.pluginUserData["custom-skins"].skins[i].data.offset.y)
@@ -382,8 +375,8 @@ const customskins_newAssetButton = document.getElementById("customskins_newAsset
 const customskins_deleteAssetButton = document.getElementById("customskins_deleteAssetButton");
 
 const customskins_OptionsAssetName = document.getElementById("customskins_OptionsAssetName");
-const customskins_OptionsOffsetX = document.getElementById("customskins_OptionsOffsetX");
-const customskins_OptionsOffsetY = document.getElementById("customskins_OptionsOffsetY");
+const customskins_DisplayOffsetX = document.getElementById("customskins_DisplayOffsetX");
+const customskins_DisplayOffsetY = document.getElementById("customskins_DisplayOffsetY");
 const customskins_OptionsAssetFile = document.getElementById("customskins_OptionsAssetFile");
 
 const customskins_OptionsScale = document.getElementById("customskins_OptionsScale");
@@ -402,8 +395,6 @@ function customskins_saveAsset() {
             return;
         }
         asset.name = customskins_OptionsAssetName.value;
-        asset.offset.x = Number(customskins_OptionsOffsetX.value);
-        asset.offset.y = Number(customskins_OptionsOffsetY.value);
         const newScale = Number(((-(5 - customskins_OptionsScale.value) / 100) + asset.scale).toFixed(2));
         if (asset.scale !== newScale && Math.sign(newScale) !== -1) asset.scale = newScale;
         customskins_DisplayScale.innerText = asset.scale;
@@ -422,6 +413,7 @@ function customskins_saveAsset() {
             customskins_skinAssets.forEach(asset => {
                 if (asset.name !== customskins_selectedAsset) return;
                 asset.asset = customskins_trimCanvas(canvas).toDataURL("image/png");
+                asset.assetImage = undefined;
             });
 
             customskins_renderAsset();
@@ -467,35 +459,57 @@ function customskins_renderAsset() {
     customskins_assetDisplayCanvasCtx.fillRect(0, 0, 1000, 1000);
 
     function renderSkin() {
-        const img = new Image();
-        img.src = asset.asset;
-        img.addEventListener("load", () => {
+        if (asset.assetImage) {
             const ratio = 0.8;
-            let centerShift_x = ((customskins_assetDisplayCanvas.width - img.width * ratio) / 2) + asset.offset.x;
-            let centerShift_y = ((customskins_assetDisplayCanvas.height - img.height * ratio) / 2) + asset.offset.y;
-            customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,
-                centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
-            // customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
-            //     0, 0, customskins_assetDisplayCanvas.width, customskins_assetDisplayCanvas.height); // destination 
-        });
+            let centerShift_x = ((customskins_assetDisplayCanvas.width - asset.assetImage.width * ratio) / 2) + asset.offset.x;
+            let centerShift_y = ((customskins_assetDisplayCanvas.height - asset.assetImage.height * ratio) / 2) + asset.offset.y;
+            customskins_assetDisplayCanvasCtx.drawImage(asset.assetImage, 0, 0, asset.assetImage.width, asset.assetImage.height,
+                centerShift_x, centerShift_y, asset.assetImage.width * ratio, asset.assetImage.height * ratio);
+        } else {
+            const img = new Image();
+            img.src = asset.asset;
+            img.addEventListener("load", () => {
+                const ratio = 0.8;
+                let centerShift_x = ((customskins_assetDisplayCanvas.width - img.width * ratio) / 2) + asset.offset.x;
+                let centerShift_y = ((customskins_assetDisplayCanvas.height - img.height * ratio) / 2) + asset.offset.y;
+                customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,
+                    centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+                // customskins_assetDisplayCanvasCtx.drawImage(img, 0, 0, img.width, img.height,     // source rectangle
+                //     0, 0, customskins_assetDisplayCanvas.width, customskins_assetDisplayCanvas.height); // destination 
+            });
+            asset.assetImage = img;
+        }
     }
 
     if (customskins_OptionsDisplayAnimal.checked) {
-        const animalImg = new Image();
-        animalImg.addEventListener("load", () => {
+        let animalId = animalList.find(a => a.id == customskins_OptionsAnimal.value || 0).stringId;
+        if (customskins_animalImages[animalId]) {
             let ratio = 0.8;
-            let centerShift_x = (customskins_assetDisplayCanvas.width - animalImg.width * ratio) / 2;
-            let centerShift_y = (customskins_assetDisplayCanvas.height - animalImg.height * ratio) / 2;
-            // customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
-            //     centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
-            customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
-                centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
+            let centerShift_x = (customskins_assetDisplayCanvas.width - customskins_animalImages[animalId].width * ratio) / 2;
+            let centerShift_y = (customskins_assetDisplayCanvas.height - customskins_animalImages[animalId].height * ratio) / 2;
+            customskins_assetDisplayCanvasCtx.drawImage(customskins_animalImages[animalId], 0, 0, customskins_animalImages[animalId].width, customskins_animalImages[animalId].height,     // source rectangle
+                centerShift_x, centerShift_y, customskins_animalImages[animalId].width * ratio, customskins_animalImages[animalId].height * ratio); // destination
 
             renderSkin();
-        });
-        animalImg.src = "https://beta.deeeep.io/assets/characters/"
-            + animalList.find(a => a.id == customskins_OptionsAnimal.value || 0).stringId
-            + ".png";
+        } else {
+            const animalImg = new Image();
+            animalImg.addEventListener("load", () => {
+                let ratio = 0.8;
+                let centerShift_x = (customskins_assetDisplayCanvas.width - animalImg.width * ratio) / 2;
+                let centerShift_y = (customskins_assetDisplayCanvas.height - animalImg.height * ratio) / 2;
+                // customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
+                //     centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
+                customskins_assetDisplayCanvasCtx.drawImage(animalImg, 0, 0, animalImg.width, animalImg.height,     // source rectangle
+                    centerShift_x, centerShift_y, animalImg.width * ratio, animalImg.height * ratio); // destination
+
+                renderSkin();
+            });
+            animalImg.src = "https://beta.deeeep.io/assets/characters/"
+                + animalList.find(a => a.id == customskins_OptionsAnimal.value || 0).stringId
+                + ".png";
+
+            customskins_animalImages[animalId] = animalImg;
+        }
     } else renderSkin();
 }
 
@@ -584,7 +598,11 @@ customskins_OptionsAssetFile.addEventListener("change", () => {
                 asset.asset = customskins_trimCanvas(canvas).toDataURL("image/png");
                 asset.originalAsset = originalReader.result
                 asset.scale = ratio;
+                asset.assetImage = undefined;
             });
+
+            customskins_DisplayOffsetX.innerText = 0;
+            customskins_DisplayOffsetY.innerText = 0;
 
 
             console.log("file asset");
@@ -599,6 +617,26 @@ customskins_OptionsAssetFile.addEventListener("change", () => {
     img.src = URL.createObjectURL(customskins_OptionsAssetFile.files[0]);
 });
 
+let isDraggingAsset = false;
+customskins_assetDisplayCanvas.addEventListener("mousedown", () => {
+    isDraggingAsset = true;
+});
+customskins_skinEditorDiv.addEventListener("mouseup", () => {
+    if (isDraggingAsset) isDraggingAsset = false;
+});
+customskins_assetDisplayCanvas.addEventListener("mousemove", (e) => {
+    if (!isDraggingAsset || !customskins_skinAssets.find(a => a.name === customskins_selectedAsset).asset) return;
+
+    const selectedAsset = customskins_skinAssets.find(a => a.name === customskins_selectedAsset);
+    selectedAsset.offset.x += e.movementX;
+    selectedAsset.offset.y += e.movementY;
+
+    customskins_DisplayOffsetX.innerText = selectedAsset.offset.x;
+    customskins_DisplayOffsetY.innerText = selectedAsset.offset.y;
+
+    customskins_renderAsset();
+});
+
 function customskins_loadAsset() {
     const asset = customskins_skinAssets.filter(a => a.name === customskins_selectedAsset)[0];
     if (asset === undefined) return;
@@ -607,8 +645,8 @@ function customskins_loadAsset() {
     else customskins_OptionsAssetName.removeAttribute("disabled");
 
     customskins_OptionsAssetName.value = asset.name;
-    customskins_OptionsOffsetX.value = asset.offset.x;
-    customskins_OptionsOffsetY.value = asset.offset.y;
+    customskins_DisplayOffsetX.innerText = asset.offset.x;
+    customskins_DisplayOffsetY.innerText = asset.offset.y;
     customskins_OptionsAssetFile.value = "";
 
     customskins_OptionsScale.value = asset.scale;
@@ -659,16 +697,6 @@ customskins_OptionsAssetName.addEventListener("change", () => {
     customskins_saveAsset();
     customskins_selectedAsset = customskins_OptionsAssetName.value;
     customskins_updateAssetList();
-});
-
-customskins_OptionsOffsetX.addEventListener("change", () => {
-    console.log('chang')
-    customskins_saveAsset();
-});
-
-customskins_OptionsOffsetY.addEventListener("change", () => {
-    console.log('chang')
-    customskins_saveAsset();
 });
 
 customskins_OptionsScale.addEventListener("change", () => {
@@ -735,8 +763,6 @@ function customskins_clearMaker() {
     customskins_assetDisplayCanvasCtx.fillRect(0, 0, 1000, 1000);
     customskins_OptionsSelectAsset.innerHTML = "";
     customskins_OptionsAssetName.value = "";
-    customskins_OptionsOffsetX.value = 0;
-    customskins_OptionsOffsetY.value = 0;
     customskins_OptionsAssetFile.value = "";
     customskins_OptionsScale.value = 5;
     customskins_DisplayScale.innerText = "";
@@ -772,6 +798,8 @@ customskins_saveButton.addEventListener("click", () => {
     let assets = {};
     let assetsData = {};
     let mainScale = 0;
+    let offsetX = 0;
+    let offsetY = 0;
 
     for (let i in customskins_skinAssets) {
         if (customskins_skinAssets[i].name !== "<main>") {
@@ -783,7 +811,11 @@ customskins_saveButton.addEventListener("click", () => {
                     y: customskins_skinAssets[i].offset.y
                 }
             };
-        } else mainScale = customskins_skinAssets[i].scale;
+        } else {
+            mainScale = customskins_skinAssets[i].scale;
+            offsetX = customskins_skinAssets[i].offset.x,
+                offsetY = customskins_skinAssets[i].offset.y
+        };
 
         assets[customskins_skinAssets[i].name === "<main>" ?
             id + ".png" :
@@ -804,8 +836,8 @@ customskins_saveButton.addEventListener("click", () => {
         asset: "drcskin_" + id + ".png",
         data: {
             offset: {
-                x: customskins_OptionsOffsetX.value,
-                y: customskins_OptionsOffsetY.value
+                x: offsetX,
+                y: offsetY
             }
         },
         assets_data: assetsData,
