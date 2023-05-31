@@ -4,6 +4,7 @@ const http = require('node:http');
 if (settings.pluginUserData["custom-skins"] === undefined || settings.pluginUserData["custom-skins"].skins === undefined) {
     settings.pluginUserData["custom-skins"] = { skins: [] };
     store.set("settings", settings);
+    window.webContents.send("settings", settings);
 }
 
 // Create HTTP server
