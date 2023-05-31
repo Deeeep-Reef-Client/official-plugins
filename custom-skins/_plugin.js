@@ -116,6 +116,7 @@ customskins_customSkinManagerOpenButton.innerText = "Make";
 assetSwapperNewButton.parentElement.insertBefore(customskins_customSkinManagerOpenButton, assetSwapperNewButton.nextElementSibling);
 
 const customskins_customSkinManagerDiv = DRC.Modal.buildModal("customskins_", "Custom Skin Maker", `
+<p>Welcome, Artist</p>
 <button id="customskins_newButton" class="assetswapper-new-button assetswapper-add-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         class="bi bi-plus" viewBox="0 0 16 16">
                         <path
