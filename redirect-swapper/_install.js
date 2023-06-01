@@ -1,0 +1,1 @@
+settings.pluginUserData["redirect-swapper"] = { redirects: [] };
