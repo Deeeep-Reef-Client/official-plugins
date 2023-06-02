@@ -1,5 +1,7 @@
 let redirectswapper_sortedAnimalList = [];
 
+let redirectswapper_petsList = [];
+
 const redirectswapper_redirectSwapperOpenButton = document.createElement("button");
 redirectswapper_redirectSwapperOpenButton.classList.add("assetswapper-new-button");
 redirectswapper_redirectSwapperOpenButton.innerText = "Redirect";
@@ -22,6 +24,7 @@ const redirectswapper_redirectSwapperNewDiv = DRC.Modal.buildModal("redirectswap
 <select id="redirectswapper_OptionsTemplateCategory">
     <option value="assets">Assets</option>
     <option value="animals">Animals</option>
+    <option value="pets">Pets</option>
     <option value="terrains">Terrains</option>
 </select>
 <select id="redirectswapper_OptionsTemplate">
@@ -114,6 +117,13 @@ redirectswapper_OptionsTemplateCategory.addEventListener("change", () => {
                 `;
             }
             break;
+        case "pets":
+            for (let i in redirectswapper_petsList) {
+                templateDropdown += `
+                    <option value="${redirectswapper_petsList[i].asset}">${redirectswapper_petsList[i].name}</option>
+                    `;
+            }
+            break;
         case "terrains":
             templateDropdown = `
             <option value="beach">Beach</option>
@@ -151,6 +161,8 @@ redirectswapper_OptionsTemplate.addEventListener("change", () => {
         }
     } else if (redirectswapper_OptionsTemplateCategory.value === "animals") {
         sourceUrl = `https://<DEEEEP_URL>/assets/characters/${redirectswapper_OptionsTemplate.value}.png`;
+    } else if (redirectswapper_OptionsTemplateCategory.value === "pets") {
+        sourceUrl = `https://cdn.deeeep.io/custom/pets/${redirectswapper_OptionsTemplate.value}`;
     } else if (redirectswapper_OptionsTemplateCategory.value === "terrains") {
         sourceUrl = `https://<DEEEEP_URL>/assets/patterns/${redirectswapper_OptionsTemplate.value.replace('-', '/')}.png`;
     }
@@ -219,3 +231,13 @@ setTimeout(function anon() {
         return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
     });
 }, 100);
+
+(async () => {
+    redirectswapper_petsList = await fetch(API_URL + "/pets")
+        .then(response => response.json())
+        .then(pets => pets.sort((a, b) => {
+            var textA = a.name.toUpperCase();
+            var textB = b.name.toUpperCase();
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        }));
+})();
