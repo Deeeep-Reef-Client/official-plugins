@@ -8,3 +8,4 @@ Plugins can be found in the correspondingly named directory.
 - Plugin Dev (plugin-dev)  
 - Custom Skins (custom-skins)
 - Fool's Plugin (fools-plugin)
+- Redirect Swapper (redirect-swapper)
