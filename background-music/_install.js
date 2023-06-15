@@ -1,0 +1,1 @@
+settings.pluginUserData["background-music"] = { music: [] };
