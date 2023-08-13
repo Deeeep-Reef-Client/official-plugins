@@ -27,6 +27,7 @@ let TRIGGER_NAMES = {
     boost: "Boost",
     kill: "Kill",
     death: "Death",
+    evolve: "Evolve"
 };
 
 // Background music button
@@ -62,6 +63,7 @@ const backgroundmusic_backgroundMusicNewDiv = DRC.Modal.buildModal("backgroundmu
 <option value="boost">Boost</option>
 <option value="kill">Kill</option>
 <option value="death">Death</option>
+<option value="evolve">Evolve</option>
 </select>
 <div class="spacer"></div>
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-soundwave" viewBox="0 0 16 16">
@@ -192,6 +194,15 @@ DRC.EventObject.addEventListener(DRC.Events.GameEnded, () => {
     // Main Menu
     backgroundmusic_musicElements.filter(m => m.trigger === "mainmenu").forEach(m => {
         console.log("Main Menu music played");
+        m.audio.currentTime = 0;
+        m.audio.play();
+    });
+});
+
+DRC.EventObject.addEventListener(DRC.Events.GameEvolved, () => {
+    // Evolve
+    backgroundmusic_musicElements.filter(m => m.trigger === "evolve").forEach(m => {
+        console.log("Evolve music played");
         m.audio.currentTime = 0;
         m.audio.play();
     });
