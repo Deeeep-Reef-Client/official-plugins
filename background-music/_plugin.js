@@ -207,3 +207,12 @@ DRC.EventObject.addEventListener(DRC.Events.GameEvolved, () => {
         m.audio.play();
     });
 });
+
+DRC.EventObject.addEventListener(DRC.Events.GameBoost, () => {
+    // Boost
+    backgroundmusic_musicElements.filter(m => m.trigger === "boost").forEach(m => {
+        console.log("Boost music played");
+        m.audio.currentTime = 0;
+        m.audio.play();
+    });
+});
