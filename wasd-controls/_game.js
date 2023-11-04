@@ -22,7 +22,7 @@ window.addEventListener("keydown", (key) => {
             wasd_controls_settingsModalContainer.setAttribute("style", "display:none");
             DRC_API.DRC.EventObject.addEventListener(DRC_API.DRC.Events.SettingsOpened, () => {
                 console.log("setting")
-                document.querySelector("div.modals-container > div > div.vfm__container.vfm--absolute.vfm--inset.vfm--outline-none.modal-container > div > div.modal__action > button.el-button.btn.nice-button.gray").click();
+                window.dispatchEvent(new KeyboardEvent(""))
             });
         } else {
             wasd_controls_settingsModalContainer.setAttribute("style", "");

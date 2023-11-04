@@ -1,0 +1,12 @@
+{
+    "name": "Custom Skins",
+    "id": "custom-skins",
+    "description": "Build and test custom skins live",
+    "author": "Dev",
+    "src": [
+        {
+            "type": "domloaded",
+            "src": ""
+        }
+    ]
+}

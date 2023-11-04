@@ -1,0 +1,35 @@
+{
+    "id": 4603,
+    "version": 2,
+    "asset": "4603-2.png",
+    "assets_data": null,
+    "deleted_at": null,
+    "depends_id": null,
+    "designer_id": null,
+    "fish_level": 66,
+    "name": "Iridescent Tiger Shark",
+    "description": "A tiger shark with iridescent coloration",
+    "reddit_link": "https://www.reddit.com/r/deeeepioskins/comments/m798hp/tiger_shark_iridescent_tiger_shark/?utm_source=share&utm_medium=ios_app&utm_name=iossmf",
+    "category": "real",
+    "season": null,
+    "on_sale": true,
+    "price": 250,
+    "sales": 1554,
+    "usable": true,
+    "reviewed": true,
+    "approved": true,
+    "rejected": false,
+    "user_id": 487355,
+    "attributes": null,
+    "beta": false,
+    "data": {
+        "offset": {
+            "x": 0,
+            "y": 15.042735042735105
+        }
+    },
+    "upcoming": false,
+    "owned": false,
+    "equiped": null,
+    "parent": null
+}
