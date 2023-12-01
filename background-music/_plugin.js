@@ -60,10 +60,10 @@ const backgroundmusic_backgroundMusicNewDiv = DRC.Modal.buildModal("backgroundmu
 <option value="ambient">Ambient</option>
 <option value="mainmenu">Main Menu</option>
 <option value="playing">Playing</option>
-<option value="boost">Boost</option>
-<option value="kill">Kill</option>
-<option value="death">Death</option>
-<option value="evolve">Evolve</option>
+<option value="boost">On Boost</option>
+<option value="kill">On Kill</option>
+<option value="death">On Death</option>
+<option value="evolve">On Evolve</option>
 </select>
 <div class="spacer"></div>
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-soundwave" viewBox="0 0 16 16">
