@@ -27,7 +27,8 @@ let TRIGGER_NAMES = {
     boost: "Boost",
     kill: "Kill",
     death: "Death",
-    evolve: "Evolve"
+    evolve: "Evolve",
+    biomeChange: "Biome Change"
 };
 
 // Background music button
@@ -64,6 +65,7 @@ const backgroundmusic_backgroundMusicNewDiv = DRC.Modal.buildModal("backgroundmu
 <option value="kill">On Kill</option>
 <option value="death">On Death</option>
 <option value="evolve">On Evolve</option>
+<option value="biomeChange">On Biome Change</option>
 </select>
 <div class="spacer"></div>
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-soundwave" viewBox="0 0 16 16">
@@ -151,6 +153,37 @@ backgroundmusic_newButton.addEventListener("click", () => {
 
 // All the music logic
 
+// Interval for checking changes
+let backgroundmusic_checkInterval;
+
+let backgroundmusic_lastArea = null;
+
+function backgroundmusic_intervalChecker() {
+    DRC.Preload.evalInBrowserContext(`
+        if (game.currentScene.myAnimal) window.drcplugin_backgroundmusic.mainWorldChecker(game.currentScene.myAnimal.currentArea);
+    `);
+}
+
+function backgroundmusic_mainWorldChecker(currentArea) {
+    if (backgroundmusic_lastArea === null) backgroundmusic_lastArea = currentArea;
+
+    // Biome change
+    if (currentArea !== backgroundmusic_lastArea) {
+        backgroundmusic_musicElements.filter(m => m.trigger === "biomeChange").forEach(m => {
+            console.log("Biome change music played");
+            m.audio.currentTime = 0;
+            m.audio.play();
+        });
+
+        backgroundmusic_lastArea = currentArea;
+    }
+}
+
+// Expose checker to main world
+contextBridge.exposeInMainWorld("drcplugin_backgroundmusic", {
+    mainWorldChecker: backgroundmusic_mainWorldChecker
+});
+
 // Ambient
 backgroundmusic_musicElements.filter(m => m.trigger === "ambient").forEach(m => {
     console.log("Ambient music played");
@@ -182,6 +215,9 @@ DRC.EventObject.addEventListener(DRC.Events.GameStarted, () => {
     backgroundmusic_musicElements.filter(m => m.trigger === "mainmenu").forEach(m => {
         m.audio.pause();
     });
+
+    // Interval
+    backgroundmusic_checkInterval = setInterval(backgroundmusic_intervalChecker, 200);
 });
 
 DRC.EventObject.addEventListener(DRC.Events.GameEnded, () => {
@@ -197,6 +233,10 @@ DRC.EventObject.addEventListener(DRC.Events.GameEnded, () => {
         m.audio.currentTime = 0;
         m.audio.play();
     });
+
+    // Interval
+    clearInterval(backgroundmusic_checkInterval);
+    backgroundmusic_lastArea = null;
 });
 
 DRC.EventObject.addEventListener(DRC.Events.GameEvolved, () => {
