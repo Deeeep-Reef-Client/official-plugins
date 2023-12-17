@@ -24,12 +24,27 @@ let TRIGGER_NAMES = {
     ambient: "Ambient",
     mainmenu: "Main Menu",
     playing: "Playing",
+    biome: "Biome",
     boost: "On Boost",
     kill: "On Kill",
     death: "On Death",
     evolve: "On Evolve",
     biomeChange: "On Biome Change"
 };
+
+// Style
+const backgroundmusic_style = document.createElement("style");
+backgroundmusic_style.innerHTML = `
+.drcplugin-backgroundmusic-biome-checkbox-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+}
+
+.drcplugin-backgroundmusic-biome-checkbox-container > div > * {
+    vertical-align: middle;
+}
+`;
+document.head.appendChild(backgroundmusic_style);
 
 // Background music button
 const backgroundmusic_openButtonWrapper = settingsButtonWrapper.cloneNode(true);
@@ -57,22 +72,53 @@ const backgroundmusic_musicList = document.getElementById("backgroundmusic_music
 
 const backgroundmusic_backgroundMusicNewDiv = DRC.Modal.buildModal("backgroundmusic_newMusic", "New Music", `
 <div class="assetswapper-list-rule">
-<select id="backgroundmusic_OptionsTrigger">
-<option value="ambient">Ambient</option>
-<option value="mainmenu">Main Menu</option>
-<option value="playing">Playing</option>
-<option value="boost">On Boost</option>
-<option value="kill">On Kill</option>
-<option value="death">On Death</option>
-<option value="evolve">On Evolve</option>
-<option value="biomeChange">On Biome Change</option>
-</select>
-<div class="spacer"></div>
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-soundwave" viewBox="0 0 16 16">
-    <path fill-rule="evenodd" d="M8.5 2a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-1 0v-11a.5.5 0 0 1 .5-.5zm-2 2a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm-6 1.5A.5.5 0 0 1 5 6v4a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm8 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm-10 1A.5.5 0 0 1 3 7v2a.5.5 0 0 1-1 0V7a.5.5 0 0 1 .5-.5zm12 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0V7a.5.5 0 0 1 .5-.5z"/>
-</svg>
-<div class="spacer"></div>
-<input type="text" id="backgroundmusic_OptionsMusic" placeholder="Music URL">
+    <select id="backgroundmusic_OptionsTrigger">
+        <option value="ambient">Ambient</option>
+        <option value="mainmenu">Main Menu</option>
+        <option value="playing">Playing</option>
+        <option value="biome">Biome</option>
+        <option value="boost">On Boost</option>
+        <option value="kill">On Kill</option>
+        <option value="death">On Death</option>
+        <option value="evolve">On Evolve</option>
+        <option value="biomeChange">On Biome Change</option>
+    </select>
+    <div class="spacer"></div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-soundwave" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M8.5 2a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-1 0v-11a.5.5 0 0 1 .5-.5zm-2 2a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm4 0a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm-6 1.5A.5.5 0 0 1 5 6v4a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm8 0a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm-10 1A.5.5 0 0 1 3 7v2a.5.5 0 0 1-1 0V7a.5.5 0 0 1 .5-.5zm12 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0V7a.5.5 0 0 1 .5-.5z"/>
+    </svg>
+    <div class="spacer"></div>
+    <input type="text" id="backgroundmusic_OptionsMusic" placeholder="Music URL">
+</div>
+<div id="backgroundmusic_biomeSelection" class="drc-modal-hidden">
+    <div class="spacer"></div>
+    <b>Biome</b>
+    <div class="drcplugin-backgroundmusic-biome-checkbox-container">
+        <div>
+            <input type="checkbox" id="backgroundmusic_BiomeCold" />
+            <label for="backgroundmusic_BiomeCold">Cold</label>
+        </div>
+        <div>
+            <input type="checkbox" id="backgroundmusic_BiomeWarm" />
+            <label for="backgroundmusic_BiomeWarm">Warm</label>
+        </div>
+        <div>
+            <input type="checkbox" id="backgroundmusic_BiomeShallow" />
+            <label for="backgroundmusic_BiomeShallow">Shallow</label>
+        </div>
+        <div>
+            <input type="checkbox" id="backgroundmusic_BiomeDeep" />
+            <label for="backgroundmusic_BiomeDeep">Deep</label>
+        </div>
+        <div>
+            <input type="checkbox" id="backgroundmusic_BiomeFresh" />
+            <label for="backgroundmusic_BiomeFresh">Fresh</label>
+        </div>
+        <div>
+            <input type="checkbox" id="backgroundmusic_BiomeSalt" />
+            <label for="backgroundmusic_BiomeSalt">Salt</label>
+        </div>
+    </div>
 </div>
 <button id="backgroundmusic_addButton" class="assetswapper-add-button">Add</button>
 `, true);
@@ -80,6 +126,18 @@ const backgroundmusic_backgroundMusicNewDiv = DRC.Modal.buildModal("backgroundmu
 const backgroundmusic_OptionsTrigger = document.getElementById("backgroundmusic_OptionsTrigger");
 const backgroundmusic_OptionsMusic = document.getElementById("backgroundmusic_OptionsMusic");
 const backgroundmusic_addButton = document.getElementById("backgroundmusic_addButton");
+const backgroundmusic_biomeSelection = document.getElementById("backgroundmusic_biomeSelection");
+const backgroundmusic_BiomeCold = document.getElementById("backgroundmusic_BiomeCold");
+const backgroundmusic_BiomeWarm = document.getElementById("backgroundmusic_BiomeWarm");
+const backgroundmusic_BiomeShallow = document.getElementById("backgroundmusic_BiomeShallow");
+const backgroundmusic_BiomeDeep = document.getElementById("backgroundmusic_BiomeDeep");
+const backgroundmusic_BiomeFresh = document.getElementById("backgroundmusic_BiomeFresh");
+const backgroundmusic_BiomeSalt = document.getElementById("backgroundmusic_BiomeSalt");
+
+backgroundmusic_OptionsTrigger.addEventListener("change", () => {
+    if (backgroundmusic_OptionsTrigger.value === "biome") backgroundmusic_biomeSelection.classList.remove("drc-modal-hidden");
+    else backgroundmusic_biomeSelection.classList.add("drc-modal-hidden");
+});
 
 function backgroundmusic_updateMusicList() {
     backgroundmusic_musicList.innerHTML = "";
@@ -89,6 +147,7 @@ function backgroundmusic_updateMusicList() {
         // Trigger
         const triggerElem = document.createElement("p");
         triggerElem.innerText = TRIGGER_NAMES[settings.pluginUserData["background-music"].music[i].trigger];
+        if (settings.pluginUserData["background-music"].music[i].trigger === "biome") triggerElem.innerText += " " + settings.pluginUserData["background-music"].music[i].biome.join(", ");
         mainElem.appendChild(triggerElem);
         const spacer1 = document.createElement("div");
         spacer1.classList.add("spacer");
@@ -123,15 +182,49 @@ function backgroundmusic_updateMusicList() {
     }
 }
 
+function backgroundmusic_clearBiomeSelection() {
+    backgroundmusic_BiomeCold.checked = false;
+    backgroundmusic_BiomeWarm.checked = false;
+    backgroundmusic_BiomeShallow.checked = false;
+    backgroundmusic_BiomeDeep.checked = false;
+    backgroundmusic_BiomeFresh.checked = false;
+    backgroundmusic_BiomeSalt.checked = false;
+}
+
 backgroundmusic_addButton.addEventListener("click", () => {
-    settings.pluginUserData["background-music"].music.push({
+    const music = {
         trigger: backgroundmusic_OptionsTrigger.value,
         musicUrl: backgroundmusic_OptionsMusic.value,
-    });
+    };
+
+    if (backgroundmusic_OptionsTrigger.value === "biome") {
+        music.biome = [];
+
+        if (backgroundmusic_BiomeCold.checked
+            && backgroundmusic_BiomeWarm.checked) music.biome.push("Cold/Warm");
+        else if (backgroundmusic_BiomeCold.checked) music.biome.push("Cold");
+        else if (backgroundmusic_BiomeWarm.checked) music.biome.push("Warm");
+
+        if (backgroundmusic_BiomeShallow.checked
+            && backgroundmusic_BiomeDeep.checked) music.biome.push("Shallow/Deep");
+        else if (backgroundmusic_BiomeShallow.checked) music.biome.push("Shallow");
+        else if (backgroundmusic_BiomeDeep.checked) music.biome.push("Deep");
+
+        if (backgroundmusic_BiomeFresh.checked
+            && backgroundmusic_BiomeSalt.checked) music.biome.push("Fresh/Salt");
+        else if (backgroundmusic_BiomeFresh.checked) music.biome.push("Fresh");
+        else if (backgroundmusic_BiomeSalt.checked) music.biome.push("Salt");
+    }
+
+    settings.pluginUserData["background-music"].music.push(music);
 
     saveSettings();
     backgroundmusic_updateMusicList();
     backgroundmusic_backgroundMusicNewDiv.classList.add("drc-modal-hidden");
+
+    backgroundmusic_OptionsTrigger.value = "ambient";
+    backgroundmusic_biomeSelection.classList.add("drc-modal-hidden");
+    backgroundmusic_clearBiomeSelection();
 
     new Notification("Music saved!", {
         body: "Your background music has been saved."
