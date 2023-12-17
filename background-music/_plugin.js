@@ -24,11 +24,11 @@ let TRIGGER_NAMES = {
     ambient: "Ambient",
     mainmenu: "Main Menu",
     playing: "Playing",
-    boost: "Boost",
-    kill: "Kill",
-    death: "Death",
-    evolve: "Evolve",
-    biomeChange: "Biome Change"
+    boost: "On Boost",
+    kill: "On Kill",
+    death: "On Death",
+    evolve: "On Evolve",
+    biomeChange: "On Biome Change"
 };
 
 // Background music button
