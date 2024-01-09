@@ -11,6 +11,7 @@ for (let i in settings.pluginUserData["background-music"].music) {
         let audioElement = new Audio(settings.pluginUserData["background-music"].music[i].musicUrl);
         backgroundmusic_musicElements.push({
             trigger: settings.pluginUserData["background-music"].music[i].trigger,
+            biome: settings.pluginUserData["background-music"].music[i].biome ?? null,
             audio: audioElement
         });
     } catch (e) {
@@ -42,6 +43,10 @@ backgroundmusic_style.innerHTML = `
 
 .drcplugin-backgroundmusic-biome-checkbox-container > div > * {
     vertical-align: middle;
+}
+
+.drcplugin-backgroundmusic-biome-checkbox-container > div > input:indeterminate {
+
 }
 `;
 document.head.appendChild(backgroundmusic_style);
@@ -139,6 +144,32 @@ backgroundmusic_OptionsTrigger.addEventListener("change", () => {
     else backgroundmusic_biomeSelection.classList.add("drc-modal-hidden");
 });
 
+function backgroundmusic_makeHabitatCheckbox(checkbox) {
+    let state = 0;
+
+    checkbox.addEventListener("change", () => {
+        state = state < 2 ? state + 1 : 0;
+
+        if (state === 0) {
+            checkbox.checked = false;
+            checkbox.indeterminate = false;
+        } else if (state === 1) {
+            checkbox.checked = true;
+            checkbox.indeterminate = false;
+        } else {
+            checkbox.checked = false;
+            checkbox.indeterminate = true;
+        }
+    });
+}
+
+backgroundmusic_makeHabitatCheckbox(backgroundmusic_BiomeCold);
+backgroundmusic_makeHabitatCheckbox(backgroundmusic_BiomeWarm);
+backgroundmusic_makeHabitatCheckbox(backgroundmusic_BiomeShallow);
+backgroundmusic_makeHabitatCheckbox(backgroundmusic_BiomeDeep);
+backgroundmusic_makeHabitatCheckbox(backgroundmusic_BiomeFresh);
+backgroundmusic_makeHabitatCheckbox(backgroundmusic_BiomeSalt);
+
 function backgroundmusic_updateMusicList() {
     backgroundmusic_musicList.innerHTML = "";
     for (let i in settings.pluginUserData["background-music"].music) {
@@ -147,7 +178,30 @@ function backgroundmusic_updateMusicList() {
         // Trigger
         const triggerElem = document.createElement("p");
         triggerElem.innerText = TRIGGER_NAMES[settings.pluginUserData["background-music"].music[i].trigger];
-        if (settings.pluginUserData["background-music"].music[i].trigger === "biome") triggerElem.innerText += " " + settings.pluginUserData["background-music"].music[i].biome.join(", ");
+        if (settings.pluginUserData["background-music"].music[i].trigger === "biome") {
+            const biome = settings.pluginUserData["background-music"].music[i].biome;
+            const biomeNames = [];
+
+            if (biome.cold === true) biomeNames.push("Cold");
+            else if (biome.cold === false) biomeNames.push("No Cold");
+
+            if (biome.warm === true) biomeNames.push("Warm");
+            else if (biome.warm === false) biomeNames.push("No Warm");
+
+            if (biome.shallow === true) biomeNames.push("Shallow");
+            else if (biome.shallow === false) biomeNames.push("No Shallow");
+
+            if (biome.deep === true) biomeNames.push("Deep");
+            else if (biome.deep === false) biomeNames.push("No Deep");
+
+            if (biome.fresh === true) biomeNames.push("Fresh");
+            else if (biome.fresh === false) biomeNames.push("No Fresh");
+
+            if (biome.salt === true) biomeNames.push("Salt");
+            else if (biome.salt === false) biomeNames.push("No Salt");
+
+            triggerElem.innerText += " (" + biomeNames.join(", ") + ")";
+        }
         mainElem.appendChild(triggerElem);
         const spacer1 = document.createElement("div");
         spacer1.classList.add("spacer");
@@ -198,22 +252,32 @@ backgroundmusic_addButton.addEventListener("click", () => {
     };
 
     if (backgroundmusic_OptionsTrigger.value === "biome") {
-        music.biome = [];
+        music.biome = {
+            cold: null,
+            warm: null,
+            shallow: null,
+            deep: null,
+            fresh: null,
+            salt: null
+        };
 
-        if (backgroundmusic_BiomeCold.checked
-            && backgroundmusic_BiomeWarm.checked) music.biome.push("Cold/Warm");
-        else if (backgroundmusic_BiomeCold.checked) music.biome.push("Cold");
-        else if (backgroundmusic_BiomeWarm.checked) music.biome.push("Warm");
+        if (backgroundmusic_BiomeCold.indeterminate) music.biome.cold = false;
+        else if (backgroundmusic_BiomeCold.checked) music.biome.cold = true;
 
-        if (backgroundmusic_BiomeShallow.checked
-            && backgroundmusic_BiomeDeep.checked) music.biome.push("Shallow/Deep");
-        else if (backgroundmusic_BiomeShallow.checked) music.biome.push("Shallow");
-        else if (backgroundmusic_BiomeDeep.checked) music.biome.push("Deep");
+        if (backgroundmusic_BiomeWarm.indeterminate) music.biome.warm = false;
+        else if (backgroundmusic_BiomeWarm.checked) music.biome.warm = true;
 
-        if (backgroundmusic_BiomeFresh.checked
-            && backgroundmusic_BiomeSalt.checked) music.biome.push("Fresh/Salt");
-        else if (backgroundmusic_BiomeFresh.checked) music.biome.push("Fresh");
-        else if (backgroundmusic_BiomeSalt.checked) music.biome.push("Salt");
+        if (backgroundmusic_BiomeShallow.indeterminate) music.biome.shallow = false;
+        else if (backgroundmusic_BiomeShallow.checked) music.biome.shallow = true;
+
+        if (backgroundmusic_BiomeDeep.indeterminate) music.biome.deep = false;
+        else if (backgroundmusic_BiomeDeep.checked) music.biome.deep = true;
+
+        if (backgroundmusic_BiomeFresh.indeterminate) music.biome.fresh = false;
+        else if (backgroundmusic_BiomeFresh.checked) music.biome.fresh = true;
+
+        if (backgroundmusic_BiomeSalt.indeterminate) music.biome.salt = false;
+        else if (backgroundmusic_BiomeSalt.checked) music.biome.salt = true;
     }
 
     settings.pluginUserData["background-music"].music.push(music);
@@ -269,6 +333,42 @@ function backgroundmusic_mainWorldChecker(currentArea) {
         });
 
         backgroundmusic_lastArea = currentArea;
+
+        backgroundmusic_musicElements.filter(m => m.trigger === "biome").forEach(m => {
+            m.audio.pause();
+        });
+
+        const habitatArray = DRC.Utils.habitatToArray(currentArea);
+
+        backgroundmusic_musicElements.filter(m => {
+            if (m.trigger === "biome") {
+                if (
+                    (m.biome.cold === true && !habitatArray.includes("Cold"))
+                    || (m.biome.cold === false && habitatArray.includes("Cold"))
+
+                    || (m.biome.warm === true && !habitatArray.includes("Warm"))
+                    || (m.biome.warm === false && habitatArray.includes("Warm"))
+
+                    || (m.biome.shallow === true && !habitatArray.includes("Shallow"))
+                    || (m.biome.shallow === false && habitatArray.includes("Shallow"))
+
+                    || (m.biome.deep === true && !habitatArray.includes("Deep"))
+                    || (m.biome.deep === false && habitatArray.includes("Deep"))
+
+                    || (m.biome.fresh === true && !habitatArray.includes("Fresh"))
+                    || (m.biome.fresh === false && habitatArray.includes("Fresh"))
+
+                    || (m.biome.salt === true && !habitatArray.includes("Salt"))
+                    || (m.biome.salt === false && habitatArray.includes("Salt"))
+                ) return false;
+
+                return true;
+            } else return false;
+        }).forEach(m => {
+            console.log("Biome music played");
+            m.audio.loop = true;
+            m.audio.play();
+        });
     }
 }
 
