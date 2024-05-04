@@ -233,7 +233,7 @@ setTimeout(function anon() {
 }, 100);
 
 (async () => {
-    redirectswapper_petsList = await fetch(API_URL + "/pets")
+    redirectswapper_petsList = await fetch(API_URL + "/pets", { credentials: "include" })
         .then(response => response.json())
         .then(pets => pets.sort((a, b) => {
             var textA = a.name.toUpperCase();
